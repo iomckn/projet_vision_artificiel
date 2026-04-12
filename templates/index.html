@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Détection Basketball</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<div id="loadingScreen" class="loading-screen" style="display:none;">
+    <div class="loading-box">
+        <div class="spinner"></div>
+        <h2>Analyse en cours</h2>
+        <p id="loadingText">Détection en cours...</p>
+
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+    </div>
+</div>
+
+<body>
+
+<div class="overlay"></div>
+
+<div class="container">
+
+    <h1>Détection Basketball</h1>
+    <p>Analysez vos vidéos pour détecter les joueurs, le ballon et le panier</p>
+
+    <div class="upload-box" id="uploadBox">
+
+        <p id="uploadText">cliquez pour sélectionner un fichier</p>
+
+        <input type="hidden" name="model" id="modelInput" value="model_yolo.pt">
+
+        <input type="file" name="video" id="videoInput" hidden>
+
+        <button id="uploadBtn" onclick="document.getElementById('videoInput').click()">
+            Choisir une vidéo
+        </button>
+
+        
+        <video id="preview" controls style="display:none;"></video>
+
+        <div class="controls" id="controls" style="display:none;">
+
+            <button class="btn primary" onclick="submitVideo()">
+                ▶ Analyser la vidéo
+            </button>
+
+            <div class="dropdown">
+
+                <div class="dropdown-btn" onclick="toggleDropdown()">
+                    <span id="selectedModel">Modèle YOLO</span>
+                    <span class="arrow">▼</span>
+                </div>
+
+                <div class="dropdown-content" id="dropdownContent">
+                    <div onclick="selectModel('model_yolo.pt')">Modèle YOLO</div>
+                    <div onclick="selectModel('model_yolo_2.pt')">Modèle 2</div>
+                </div>
+
+            </div>
+
+            <button class="btn secondary" onclick="reset()">
+                ⬆ Nouvelle vidéo
+            </button>
+
+        </div>
+
+    </div>
+
+    <div id="loader" class="loader" style="display:none;">
+        Analyse en cours...
+    </div>
+
+</div>
+
+<script>
+    const controls = document.getElementById("controls");
+    let file;
+
+    const input = document.getElementById("videoInput");
+    const preview = document.getElementById("preview");
+    const text = document.getElementById("uploadText");
+    const btn = document.getElementById("uploadBtn");
+
+    input.addEventListener("change", function(e) {
+        file = e.target.files[0];
+
+        if (file) {
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = "block";
+
+            text.style.display = "none";
+            btn.style.display = "none";
+
+            controls.style.display = "flex"; // 🔥 AJOUT ICI
+        }
+    });
+
+    function reset(){
+        location.reload();
+    }
+
+    function submitVideo(){
+
+        let formData = new FormData();
+        formData.append("video", file);
+        formData.append("model", document.getElementById("modelInput").value);
+
+        // 🔥 afficher loader
+        document.getElementById("loadingScreen").style.display = "flex";
+
+        let progress = document.getElementById("progress");
+        let text = document.getElementById("loadingText");
+
+        let percent = 0;
+
+        // animation fake progression
+        let interval = setInterval(() => {
+            percent += Math.random() * 10;
+
+            if (percent >= 95) percent = 95;
+
+            progress.style.width = percent + "%";
+
+            // changer texte dynamique
+            if (percent < 30) text.innerText = "Chargement vidéo...";
+            else if (percent < 60) text.innerText = "Détection des objets...";
+            else if (percent < 90) text.innerText = "Analyse en cours...";
+            else text.innerText = "Finalisation...";
+
+        }, 500);
+
+        fetch("/upload", {
+            method: "POST",
+            body: formData
+        })
+        .then(res => res.text())
+        .then(html => {
+
+            clearInterval(interval);
+
+            // finir la barre
+            progress.style.width = "100%";
+            text.innerText = "Terminé !";
+
+            setTimeout(() => {
+                document.open();
+                document.write(html);
+                document.close();
+            }, 500);
+        });
+    }
+
+    let selectedModelValue = "model_yolo.pt";
+
+    function toggleDropdown() {
+        const menu = document.getElementById("dropdownContent");
+        menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }
+
+    function selectModel(value) {
+        selectedModelValue = value;
+
+        // mettre à jour le texte
+        document.getElementById("selectedModel").innerText =
+            value === "model_yolo.pt" ? "Modèle YOLO" : "Modèle 2";
+
+        //envoyer au backend
+        document.getElementById("modelInput").value = value;
+
+        document.getElementById("dropdownContent").style.display = "none";
+    }
+</script>
+
+</body>
+</html>

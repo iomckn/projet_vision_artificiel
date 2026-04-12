@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Détection Basketball</h1>
+    <p>Analysez vos vidéos pour détecter les joueurs, le ballon et le panier en temps réel</p>
+
+    
+    <div class="status-box">
+        <div class="check-icon">✔</div>
+        <div>
+            <h2>Analyse terminée</h2>
+            <p>Traité avec {{ model_name }}</p>
+        </div>
+    </div>
+
+    
+    <div class="upload-box">
+        <video controls autoplay>
+            <source src="{{ url_for('static', filename=video_name) }}" type="video/mp4">
+        </video>
+    </div>
+
+</div>
+
+
+<div class="stats">
+
+    <div class="card">
+        <div class="icon">👤</div>
+        <h1>{{ players }}</h1>
+        <p>Joueurs détectés</p>
+    </div>
+
+    <div class="card">
+        <div class="icon">🎯</div>
+        <h1>{{ confidence }}%</h1>
+        <p>Confiance moyenne</p>
+    </div>
+
+    <div class="card">
+        <div class="icon">📈</div>
+        <h1>{{ ball }}</h1>
+        <p>Ballon détecté</p>
+    </div>
+
+</div>
+
+</body>
+</html>
