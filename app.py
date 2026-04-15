@@ -1,10 +1,8 @@
 from flask import Flask, render_template, request
-from ultralytics import YOLO
+from ultralytics import YOLO, RTDETR
 from flask import send_from_directory
 import os
 import cv2
-import glob
-import shutil
 
 app = Flask(__name__)
 
@@ -52,9 +50,14 @@ def upload():
     input_path = os.path.join("uploads", file.filename)
     file.save(input_path)
 
-    model = YOLO(os.path.join("models", model_name))
+    model_path = os.path.join("models", model_name)
 
-    # 🔥 ouvrir vidéo
+    if model_name == "model_RTDETR.pt":
+        model = RTDETR(model_path)
+    else:
+        model = YOLO(model_path)
+
+    # ouvrir vidéo
     cap = cv2.VideoCapture(input_path)
 
     fps = int(cap.get(cv2.CAP_PROP_FPS))
