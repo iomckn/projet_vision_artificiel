@@ -57,7 +57,7 @@
 
                 <div class="dropdown-content" id="dropdownContent">
                     <div onclick="selectModel('model_yolo.pt')">Modèle YOLO</div>
-                    <div onclick="selectModel('model_yolo_2.pt')">Modèle 2</div>
+                    <div onclick="selectModel('model_RTDETR.pt')">Modèle RTDETR</div>
                 </div>
 
             </div>
@@ -166,7 +166,7 @@
 
         // mettre à jour le texte
         document.getElementById("selectedModel").innerText =
-            value === "model_yolo.pt" ? "Modèle YOLO" : "Modèle 2";
+            value === "model_yolo.pt" ? "Modèle YOLO" : "Modèle RTDETR";
 
         //envoyer au backend
         document.getElementById("modelInput").value = value;
