@@ -97,7 +97,7 @@ def upload():
 
     filename = file.filename.lower()
 
-    is_image = filename.endswith((".jpg", ".jpeg", ".png"))
+    is_image = filename.endswith((".jpg", ".jpeg", ".png",".avif", ".webp"))
     is_video = filename.endswith((".mp4", ".avi", ".mov"))
 
     model_path = os.path.join("models", model_name)
@@ -115,7 +115,7 @@ def upload():
     frame_num = 0
 
     if is_image:
-        results = model(input_path, conf=0.5)[0]
+        results = model(input_path, conf=0.55)[0]
 
         annotated = results.plot()
 
