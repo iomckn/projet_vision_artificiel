@@ -180,7 +180,7 @@ def upload():
             break
 
         if model_name == "model_RTDETR.pt":
-            results = model(frame, conf=0.5)[0]
+            results = model(frame, conf=0.4)[0]
 
             annotated_frame = results.plot()
 
@@ -239,9 +239,32 @@ def upload():
                                 player_teams = classify_teams(player_hues)
                                 TEAM_LOCKED = True
 
-                        # assignation équipe
-                        if TEAM_LOCKED and tid in player_teams:
-                            team = player_teams[tid]
+                        # assignation équipe améliorée
+                        if TEAM_LOCKED:
+                            if tid in player_teams:
+                                team = player_teams[tid]
+                            else:
+                                # estimation pour nouveaux joueurs
+                                if tid in player_hues and len(player_hues[tid]) > 5:
+                                    hue_mean = np.mean(player_hues[tid])
+
+                                    centers = []
+                                    for t in [0, 1]:
+                                        vals = [
+                                            np.mean(player_hues[i])
+                                            for i in player_teams
+                                            if player_teams[i] == t and len(player_hues[i]) > 0
+                                        ]
+                                        if len(vals) > 0:
+                                            centers.append(np.mean(vals))
+                                        else:
+                                            centers.append(0)
+
+                                    # choisir l’équipe la plus proche
+                                    distances = [abs(hue_mean - c) for c in centers]
+                                    team = int(np.argmin(distances))
+                                else:
+                                    team = -1
                         else:
                             team = -1
 
